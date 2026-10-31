@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>User Registration Server</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f1f5f9; margin: 0; padding: 1.5rem 1rem; color: #1e293b; }
+    main { max-width: 480px; margin: 0 auto; background: #fff; padding: 1.5rem; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
+    h1 { margin-top: 0; font-size: 1.4rem; }
+    label { display: block; font-weight: 600; margin-top: .8rem; }
+    input, select { width: 100%; padding: .5rem; border: 2px solid #cbd5e1; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    button { margin-top: 1rem; width: 100%; padding: .7rem; border: 0; border-radius: 6px; background: #0f766e; color: #fff; font-size: 1rem; cursor: pointer; }
+    .err { color: #dc2626; font-size: .85rem; margin: .2rem 0 0; }
+    #msg { margin-top: 1rem; padding: .7rem .9rem; border-radius: 6px; display: none; }
+    #msg.ok { display: block; background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    #msg.bad { display: block; background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+    nav a { margin-right: .8rem; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>User Registration</h1>
+  <nav><a href="/users">/users</a><a href="/export">/export (CSV)</a><a href="/health">/health</a></nav>
+  <form id="f" novalidate>
+    <label for="name">Name</label><input id="name" name="name"><p class="err" data-for="name"></p>
+    <label for="email">Email</label><input id="email" name="email"><p class="err" data-for="email"></p>
+    <label for="phone">Phone</label><input id="phone" name="phone"><p class="err" data-for="phone"></p>
+    <label for="age">Age</label><input id="age" name="age" type="number"><p class="err" data-for="age"></p>
+    <label for="course">Course</label>
+    <select id="course" name="course"><option value="">-- select --</option><option value="web">Web</option>
+      <option value="python">Python</option><option value="java">Java</option><option value="dsa">DSA</option></select>
+    <p class="err" data-for="course"></p>
+    <label for="password">Password</label><input id="password" name="password" type="password"><p class="err" data-for="password"></p>
+    <button type="submit">Register</button>
+  </form>
+  <div id="msg" role="status"></div>
+</main>
+<script>
+  // The form skips browser validation on purpose, so the SERVER does all the checking.
+  const f = document.getElementById("f"), msg = document.getElementById("msg");
+  f.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    document.querySelectorAll(".err").forEach((p) => (p.textContent = ""));
+    msg.className = "";
+    const res = await fetch("/register", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(Object.fromEntries(new FormData(f))) });
+    const body = await res.json();
+    msg.textContent = `${body.message} (HTTP ${res.status})`;
+    msg.className = res.ok ? "ok" : "bad";
+    for (const [k, v] of Object.entries(body.errors || {})) {
+      const p = document.querySelector(`[data-for="${k}"]`); if (p) p.textContent = v;
+    }
+    if (res.ok) f.reset();
+  });
+</script>
+</body>
+</html>

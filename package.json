@@ -1,0 +1,12 @@
+{
+  "name": "registration-server",
+  "version": "1.0.0",
+  "description": "User registration server using only NodeJS core modules, with server-side validation",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": { "node": ">=18" },
+  "license": "ISC"
+}
